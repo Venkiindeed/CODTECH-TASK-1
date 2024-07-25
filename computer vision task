@@ -1,36 +1,38 @@
 import tensorflow as tf
-from tensorflow.keras import datasets, layers, models
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.applications.mobilenet_v2 import preprocess_input, decode_predictions
+import numpy as np
 import matplotlib.pyplot as plt
 
-(train_images, train_labels), (test_images, test_labels) = datasets.cifar10.load_data()
-train_images, test_images = train_images / 255.0, test_images / 255.0
 
-  model = models.Sequential([
-    layers.Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)),
-    layers.MaxPooling2D((2, 2)),
-    layers.Conv2D(64, (3, 3), activation='relu'),
-    layers.MaxPooling2D((2, 2)),
-    layers.Conv2D(64, (3, 3), activation='relu'),
-    layers.Flatten(),
-    layers.Dense(64, activation='relu'),
-    layers.Dense(10)
-])
-
-model.compile(optimizer='adam',
-              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-              metrics=['accuracy'])
-
-history = model.fit(train_images, train_labels, epochs=10, 
-                    validation_data=(test_images, test_labels))
+model = tf.keras.applications.MobileNetV2(weights='imagenet')
 
 
-test_loss, test_acc = model.evaluate(test_images, test_labels, verbose=2)
-print(f'Test accuracy: {test_acc}')
+img_path = '/content/TuzgE5.webp'  
 
-plt.plot(history.history['accuracy'], label='accuracy')
-plt.plot(history.history['val_accuracy'], label = 'val_accuracy')
-plt.xlabel('Epoch')
-plt.ylabel('Accuracy')
-plt.ylim([0.5, 1])
-plt.legend(loc='lower right')
-plt.show()
+
+try:
+    img = image.load_img(img_path, target_size=(224, 224))  
+    x = image.img_to_array(img)  
+    x = np.expand_dims(x, axis=0)  
+    x = preprocess_input(x)  
+    
+    
+    preds = model.predict(x)  
+    decoded_preds = decode_predictions(preds, top=5)[0] 
+    
+  
+    print('Predictions:')
+    for i, (imagenet_id, label, score) in enumerate(decoded_preds):
+        print(f"{i + 1}: {label} ({score:.2f})")
+    
+  
+    plt.imshow(img)
+    plt.axis('off')  
+    plt.show()  
+
+except FileNotFoundError:
+    print(f"Error: The file '{img_path}' was not found.")
+except Exception as e:
+    print(f"An error occurred: {str(e)}")
+
