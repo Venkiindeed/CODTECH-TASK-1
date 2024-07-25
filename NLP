@@ -1,17 +1,26 @@
+pip install nltk
+
 import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
+nltk.download('vader_lexicon')
 
 sid = SentimentIntensityAnalyzer()
 
-text = "NLTK is a powerful library for Natural Language Processing. It's widely used for text analysis and provides easy-to-use interfaces."
+texts = [
+    "I love this product! It's amazing.",
+    "This movie was really bad. I hated it.",
+    "The weather is nice today.",
+    "I'm not sure how I feel about this."
+]
 
-scores = sid.polarity_scores(text)
-
-print(scores)
-
-if scores['compound'] >= 0.05:
-    print("Positive sentiment")
-elif scores['compound'] <= -0.05:
-    print("Negative sentiment")
-else:
-    print("Neutral sentiment")
+for text in texts:
+    print(f"Text: {text}")
+    scores = sid.polarity_scores(text)
+    print(f"Sentiment scores: {scores}")
+    if scores['compound'] >= 0.05:
+        print("Overall sentiment: Positive")
+    elif scores['compound'] <= -0.05:
+        print("Overall sentiment: Negative")
+    else:
+        print("Overall sentiment: Neutral")
+    print()
